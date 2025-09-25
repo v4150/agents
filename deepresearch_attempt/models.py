@@ -7,4 +7,4 @@ GPT_4_1_MINI = "gpt-4.1-mini"
 # OLLAMA MODELS
 ollama_base_url = "http://localhost:11434/v1"
 o_client = AsyncOpenAI(base_url=ollama_base_url, api_key="ollama")
-o_model = OpenAIChatCompletionsModel(model="llama3.2", openai_client=o_client)
+LLAMA_3_2 = OpenAIChatCompletionsModel(model="llama3.2", openai_client=o_client)

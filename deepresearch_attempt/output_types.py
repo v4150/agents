@@ -29,3 +29,8 @@ class PrepareData(BaseModel):
     questions: Questions = Field(
         "Questions used to verify the the details within the final report"
     )
+
+
+# Report Agent Output
+class Report(BaseModel):
+    report: str = Field("The Actual Report")
