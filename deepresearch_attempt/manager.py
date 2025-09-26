@@ -20,7 +20,8 @@ class Manager:
         self.num_search_strings = num_search_strings
 
         # create agents
-        reporter_agent = self._create_report_agent()
+        display_agent = self._create_display_agent()
+        reporter_agent = self._create_report_agent(display_agent)
         self._create_preparer_agent(reporter_agent)
 
     def _create_search_planner_agent(self):
@@ -64,7 +65,7 @@ class Manager:
         handoffs = [
             reporter_agent,
         ]
-        preparer_agent_instructions = f"""
+        preparer_agent_instructions = """
 You are an assistant preparing your worker to perform some deep research on a topic.
 You are tasked with the following:
     1. Use your tools and request difficult questions pertaining to the topic
@@ -114,7 +115,7 @@ After you've received a response from both tools, handoff the data to the report
             output_type=Report,
         )
 
-    def _create_report_agent(self):
+    def _create_report_agent(self, display_agent):
 
         # create agents for tooling
         self._create_report_generator_agent()
@@ -141,16 +142,59 @@ After you've received a response from both tools, handoff the data to the report
             return result
 
         # define the report agent
-        report_agent_instructions = "You are tasked with two things: researching the provided input strings and generating a report with your findings;  Use your tool, reporter_tool, to complete your task."
+        report_agent_instructions = """
+        You are tasked with two things: researching the provided input strings and generating a report with your findings;  Use your tool, reporter_tool, to complete your task.
+        Once you have completed your tasks, handoff the document to the display_agent tool.
+        """
         return Agent(
             name="report_agent",
             instructions=report_agent_instructions,
             model=GPT_4_1_MINI,
+            handoffs=[display_agent],
             handoff_description="Take the input data and generate an actual report",
             tools=[reporter_tool],
+        )
+
+    def _create_markdown_agent(self):
+        markdown_agent_instructions = "You are a glorified Markdown Formatter.  You are tasked with converting the input document to Markdown Format.  While you are at it, add a table of contents page along with hyperlinks to each section of the document"
+
+        return Agent(
+            name="markdown_agent",
+            instructions=markdown_agent_instructions,
+            model=GPT_4_1_MINI,
+        )
+
+    def _create_display_agent(self):
+        # markdown agent
+        md_agent = self._create_markdown_agent()
+        md_tool = md_agent.as_tool(
+            tool_name="markdown_tool",
+            tool_description="converts a document into markdown format",
+        )
+
+        # display function_tool
+        @function_tool
+        def display_tool(md: str):
+            """Tool to display the final report"""
+            print(md)
+
+        tools = [md_tool, display_tool]
+        display_agent_instructions = """
+        The following are your tasks:
+            1. Convert the input document to Markdown Format and add a table of contents containing hyperlinks to every section.
+            2. Display Markdown formatted document to the screen
+        Note, you can only use your provided tools to perform these tasks.
+        """
+
+        return Agent(
+            name="display_agent",
+            instructions=display_agent_instructions,
+            model=GPT_4_1_MINI,
+            tools=tools,
+            handoff_description="format and display",
         )
 
     async def run(self):
         with trace("prepare-test"):
             result = await Runner.run(self.preparer_agent, "Basketball")
-        print(result.final_output)
+        print(result.is_complete)
