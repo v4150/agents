@@ -8,6 +8,7 @@ from agents import Agent, Runner, WebSearchTool, function_tool, trace
 
 DEFAULT_NUM_QUESTIONS = 3
 DEFAULT_NUM_SEARCH_STRINGS = 5
+TOPIC = "Waterpolo"
 
 
 class Manager:
@@ -70,10 +71,10 @@ You are an assistant preparing your worker to perform some deep research on a to
 You are tasked with the following:
     1. Use your tools and request difficult questions pertaining to the topic
     2. Use your tools and request queries to search for.  Do not actually perform a websearch for these queries; provide the queries only.
+    3. After recieving a response from both tools, handoff the data to the reporter agent.
 Rules:
-    1. You must only use tools to complete these tasks
-    2. You can only call each tool one time.
-After you've received a response from both tools, handoff the data to the reporter agent.
+    1. You must only use tools to complete the 'questions' and 'search' tasks prior to handoff.
+    2. Important, you must wait for a response from both tools before you can execute the handoff.
 """
         self.preparer_agent = Agent(
             name="preparer_agent",
@@ -195,6 +196,6 @@ After you've received a response from both tools, handoff the data to the report
         )
 
     async def run(self):
-        with trace("prepare-test"):
-            result = await Runner.run(self.preparer_agent, "Basketball")
-        print(result.is_complete)
+        with trace("DeepResearch"):
+            result = await Runner.run(self.preparer_agent, TOPIC)
+        print("done")

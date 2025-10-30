@@ -1,0 +1,27 @@
+task_scout:
+  description: >
+    Find the top 3 Prospects in College Basketball for the 2026 NBA Season
+  expected_output: >
+    A list of the Top 3 Prospects, including their First and Last Name, Position, and College they play for
+  agent: scouting_agent
+  output_file: outputs/prospects.json
+
+task_researcher:
+  description: >
+    Research all provided prospects and create a detailed report including their stats for the latest college basketball season.  This report will eventually be used to determine who will win the first draft pick, so make sure to include valuable details!
+  expected_output: >
+    A detailed report on all prospects
+  agent: prospect_researcher
+  context:
+    - task_scout
+  output_file: outputs/research.json
+
+task_pick:
+  description: >
+    Analyze the provided report and determine which prospect is likely to become the number one draft pick for the 2026 NBA Season.  
+  expected_output: >
+    The name, position and college of the prospect that you think will be the first pick for the 2026 NBA Season.
+  context:
+    - task_researcher
+  agent: pick_prospect
+  output_file: outputs/pick.json

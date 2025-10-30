@@ -1,0 +1,26 @@
+task_propose:
+  description: >
+    Argue in favor of {athlete_name} being the greatest basketball player of all time
+  expected_output: >
+    Strong compelling points for why {athlete_name} should be named the greatest basketball player of all time
+  agent: debater
+  model: openai/gpt-4o-mini
+  output_file: outputs/propose.md
+
+task_oppose:
+  description: >
+    Argue against {athlete_name} being the greatest basketball player of all time
+  expected_output: >
+    Strong compelling points for why {athlete_name} should not be named the greatest basketball player of all time
+  agent: debater
+  model: openai/gpt-4o-mini
+  output_file: outputs/oppose.md
+
+task_decide:
+  description: >
+    Review the arguments from both sides and decide which is more convincing.
+  expected_output: >
+    A decision of whether or not {athlete_name} is the greatest basketball player of all time.
+  agent: judge
+  model: openai/gpt-4o-mini
+  output_file: outputs/conclusion.md
